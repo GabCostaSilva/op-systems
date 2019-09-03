@@ -16,9 +16,9 @@ int Y[N][N];
 
 
 int max(int a, int b, int c) {
-	int max = a ? (a > b) : b;
+	int max = (a > b) ? a : b;
 
-	max = c ? (c > max) : max;
+	max = (c > max) ? c : max;
 
 	return max;
 }
@@ -36,14 +36,14 @@ int posicaoDiagonalDireita(int i, int j) {
 }
 
 void *preencheY(void* args){
-	struct Arguments *arguments = args;
-
-	int i = arguments->i;
-	int j = arguments->j;
-
 	printf("Preenchendo Y...\n");
-	
-	Y[i][j] = (rand() % 10) + 1;
+	srand(time(NULL));
+	for(int i = 0; i < N; i++) {
+		for (int j = 0; j < N; ++j)
+		{
+			Y[i][j] = (rand() % 10) + 1;
+		}
+	}
 }
 
 void *preenchePrimeiraLinhaDeX(void* args) {
@@ -53,9 +53,8 @@ void *preenchePrimeiraLinhaDeX(void* args) {
 	int j = arguments->j;
 
 	if(i == 0) {
-		printf("Preenchendo primeira linha...\n");
 		X[i][j] = (rand() % 100) + 1; 
-		printf("Coluna[%d] = %d\n", j, X[i][j]);
+		printf("\nPreenchendo primeira linha: X[%d][%d] = %d\n", i, j, X[i][j]);
 	}
 }
 
@@ -66,8 +65,8 @@ void *preencheRegiaoCentralDeX(void* args) {
 	int j = arguments->j;
 
 	if((i > 0) && (j > 0) && (j < N - 1)) {
-		printf("Preenchendo centro...\n");
 		X[i][j] = max(posicaoDiagonalEsquerda(i, j), posicaoSuperior(i, j), posicaoDiagonalDireita(i, j)) + Y[i][j];
+		printf("\nPreenchendo centro: X[%d][%d] = %d\n", i, j, X[i][j]);
 
 	}
 }
@@ -79,8 +78,8 @@ void *preencheRegiaoLateralDeX(void* args) {
 	int j = arguments->j;
 
 	if((i > 0) && (j == 0 || j == N - 1)) {
-		printf("Preenchendo laterais...\n");
 		X[i][j] = posicaoSuperior(i, j) + Y[i][j];
+		printf("\nPreenchendo laterais: X[%d][%d] = %d\n", i, j, X[i][j]);
 	}
 }
 
@@ -89,21 +88,16 @@ int main() {
 	pthread_t t1, t2, t3, t4;
 
 	struct Arguments args;
-	
 
+	pthread_create(&t1, NULL, &preencheY, NULL);
 	for(int i = 0; i < N; i++) {
 		for (int j = 0; j < N; ++j)
 		{	
 			args.i = i;
 			args.j = j;
-			pthread_create(&t1, NULL, &preencheY, &args);
-			sleep(1);
 			pthread_create(&t2, NULL, &preenchePrimeiraLinhaDeX, &args);
-			sleep(1);
 			pthread_create(&t3, NULL, &preencheRegiaoLateralDeX, &args);
-			sleep(1);
 			pthread_create(&t4, NULL, &preencheRegiaoCentralDeX, &args);
-			sleep(1);
 
 			pthread_join(t1, NULL);
 			pthread_join(t2, NULL);
@@ -112,12 +106,21 @@ int main() {
 
 		}
 	}
-
+	printf("X\n");
 	for (int i = 0; i < N; ++i)
 	{
 		for (int j = 0; j < N; ++j)
 		{
-			printf("[%d][%d] = %d\n", i, j, X[i][j]);
+			printf("%d ", X[i][j]);
+		}
+		printf("\n");
+	}
+	printf("Y\n");
+		for (int i = 0; i < N; ++i)
+	{	
+		for (int j = 0; j < N; ++j)
+		{
+			printf("%d ", Y[i][j]);
 		}
 		printf("\n");
 	}
