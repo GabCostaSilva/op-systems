@@ -53,6 +53,7 @@ void *preenchePrimeiraLinhaDeX(void* args) {
 	int j = arguments->j;
 
 	if(i == 0) {
+		git s
 		X[i][j] = (rand() % 100) + 1; 
 		printf("\nPreenchendo primeira linha: X[%d][%d] = %d\n", i, j, X[i][j]);
 	}
